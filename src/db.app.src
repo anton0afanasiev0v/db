@@ -1,14 +1,14 @@
 {application, db,
  [{description, "An OTP application"},
   {vsn, "0.1.0"},
-  {registered, []},
+  {registered, [db_app, db_sup]},
   {mod, {db_app, []}},
   {applications,
    [kernel,
     stdlib
    ]},
   {env,[]},
-  {modules, []},
+  {modules, [db, db_app, db_sup]},
 
   {licenses, ["Apache-2.0"]},
   {links, []}
