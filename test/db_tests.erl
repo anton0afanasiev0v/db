@@ -89,4 +89,32 @@ should_success_match_test() ->
       Keys = db_server:match(value, Pid),
       ?assertEqual([key1, key2], lists:sort(Keys))
     end}.
+
+should_work_with_multiple_processes_test() ->
+  {setup,
+    %% given
+    fun() ->
+      {ok, Pid1} = db_server:start_link(),
+      {ok, Pid2} = db_server:start_link(),
+      {ok, Pid3} = db_server:start_link(),
+      {ok, Pid4} = db_server:start_link(),
+      {ok, Pid5} = db_server:start_link(),
+      [Pid1, Pid2, Pid3, Pid4, Pid5]
+    end,
+    %% cleanup
+    fun(Pids) ->
+      lists:foreach(fun(Pid) -> db_server:stop(Pid) end, Pids),
+      ok
+    end,
+    %% when and then
+    fun(Pids) ->
+      lists:foreach(
+        fun({Pid, N}) ->
+          db_server:write(N, N, Pid),
+          {ok, Value} = db_server:read(N, Pid),
+          ?assertEqual(N, Value)
+        end,
+        lists:zip(Pids, lists:seq(1, length(Pids)))
+      )
+    end}.
 -endif.
